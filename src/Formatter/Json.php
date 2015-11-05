@@ -96,7 +96,6 @@ class Json implements FormatterInterface
         }
     }
 
-
     /**
      * Formats data into a single line to be written by the writer.
      *
@@ -106,6 +105,33 @@ class Json implements FormatterInterface
     public function format($event)
     {
 
+    }
+
+    /**
+     * Set Escaper instance
+     *
+     * @param Escaper $escaper
+     * @return Json
+     */
+    public function setEscaper(Escaper $escaper)
+    {
+        $this->escaper = $escaper;
+        return $this;
+    }
+
+    /**
+     * Get Escaper instance
+     *
+     * Lazy-loads an instance with the current encoding if none registered.
+     *
+     * @return Escaper
+     */
+    public function getEscaper()
+    {
+        if(null === $this->escaper){
+            $this->setEscaper(new Escaper($this->getEncoding()));
+        }
+        return $this->escaper;
     }
 
     /**
