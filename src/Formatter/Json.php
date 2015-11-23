@@ -9,6 +9,7 @@
 
 namespace Zend\Log\Formatter;
 
+use DateTime;
 use Traversable;
 use Zend\Escaper\Escaper;
 use Zend\Stdlib\ArrayUtils;
@@ -104,7 +105,49 @@ class Json implements FormatterInterface
      */
     public function format($event)
     {
+        if(isset($event['timestamp']) && $event['timestamp'] instanceof DateTime) {
+            $event['timestamp'] = $event['timestamp']->format($this->getDateTimeFormat());
+        }
 
+        $dataToInsert = $event;
+
+        if($this->elementMap !== null) {
+            $dataToInsert = [];
+
+            foreach($this->elementMap as $elementName => $fieldKey) {
+                $dataToInsert[$elementName] = $event[$fieldKey];
+            }
+        }
+
+        $enc     = $this->getEncoding();
+        $escaper = $this->getEscaper();
+        $formattedData = [];
+
+        foreach($dataToInsert as $key => $value) {
+            if (empty($value)
+                || is_scalar($value)
+                || ((is_array($value) || $value instanceof Traversable) && $key == "extra")
+                || (is_object($value) && method_exists($value, '__toString'))
+            ) {
+                /*if ($key == "message") {
+                    //$value = $escaper->escapeHtml($value);
+                }
+
+                if ($key == "extra" && empty($value)) {
+                    continue;
+                }
+
+                if ($key == "extra" && (is_array($value) || $value instanceof Traversable)) {
+                    //$elt->appendChild($this->buildElementTree($dom, $dom->createElement('extra'), $value));
+
+                    continue;
+                }*/
+                $formattedData[$this->rootElement][$key] = $value;
+                //$elt->appendChild(new DOMElement($key, (string) $value));
+            }
+        }
+
+        return json_encode($formattedData);
     }
 
     /**
