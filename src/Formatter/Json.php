@@ -143,7 +143,6 @@ class Json implements FormatterInterface
                     continue;
                 }*/
                 $formattedData[$this->rootElement][$key] = $value;
-                //$elt->appendChild(new DOMElement($key, (string) $value));
             }
         }
 
